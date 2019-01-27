@@ -1,8 +1,8 @@
 import * as types from './actionTypes'
 
-export const addPlace = (placeName, location) => ({
+export const addPlace = (placeName, location, image) => ({
   type: types.ADD_PLACE,
-  placeName, location
+  placeName, location, image
 })
 
 export const deletePlace = placeKey => ({

@@ -31,6 +31,10 @@ class SharePlace extends Component {
                 location: {
                     value: null,
                     isValid: false
+                },
+                image: {
+                    value: null,
+                    isValid: false
                 }
             }
         }
@@ -59,8 +63,8 @@ class SharePlace extends Component {
     }
 
     handleAddPlace = () => {
-        const { placeName, location } = this.state.controls
-        this.props.onAddPlace(placeName.value, location.value)
+        const { placeName, location, image } = this.state.controls
+        this.props.onAddPlace(placeName.value, location.value, image.value)
     }
 
     handlePickLocation = location => {
@@ -69,6 +73,18 @@ class SharePlace extends Component {
                 ...prevState.controls,
                 location: {
                     value: location,
+                    isValid: true
+                }
+            }
+        }))
+    }
+
+    handlePickImage = image => {
+        this.setState(prevState => ({
+            controls: {
+                ...prevState.controls,
+                image: {
+                    value: image,
                     isValid: true
                 }
             }
@@ -84,7 +100,7 @@ class SharePlace extends Component {
                     <MainText>
                         <Heading>Share a Place with us</Heading>
                     </MainText>
-                    <PickImage />
+                    <PickImage onImagePicked={this.handlePickImage} />
                     <PickLocation onLocationPick={this.handlePickLocation} />
                     <AddPlace
                         value={placeName.value}
@@ -101,7 +117,7 @@ class SharePlace extends Component {
 }
 
 const mapDispatchToProps = dispatch => ({
-    onAddPlace: (name, location) => dispatch(addPlace(name, location))
+    onAddPlace: (name, location, image) => dispatch(addPlace(name, location, image))
 })
 
 const styles = StyleSheet.create({

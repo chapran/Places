@@ -13,7 +13,7 @@ export default (state = initialState, action) => {
                     name: action.placeName,
                     key: Math.random().toString(),
                     image: {
-                        uri: 'https://www.w3schools.com/w3css/img_lights.jpg'
+                        uri: action.image.uri
                     },
                     location: action.location
                 }]
