@@ -27,6 +27,10 @@ class SharePlace extends Component {
                     validationRules: {
                         minLength: 2
                     }
+                },
+                location: {
+                    value: null,
+                    isValid: false
                 }
             }
         }
@@ -35,6 +39,7 @@ class SharePlace extends Component {
     onChange = value => {
         this.setState(prevState => ({
             controls: {
+                ...prevState.controls,
                 placeName: {
                     ...prevState.controls.placeName,
                     value,
@@ -54,14 +59,25 @@ class SharePlace extends Component {
     }
 
     handleAddPlace = () => {
-        const { placeName } = this.state.controls
-        if (placeName.value.trim() !== '') {
-            this.props.onAddPlace(placeName.value)
-        }
+        const { placeName, location } = this.state.controls
+        this.props.onAddPlace(placeName.value, location.value)
+    }
+
+    handlePickLocation = location => {
+        this.setState(prevState => ({
+            controls: {
+                ...prevState.controls,
+                location: {
+                    value: location,
+                    isValid: true
+                }
+            }
+        }))
     }
 
     render() {
-        const { placeName } = this.state.controls
+        const { placeName, location } = this.state.controls
+        const isFormValid = placeName.isValid && location.isValid
         return (
             <KeyboardAvoidingView behavior='position' keyboardVerticalOffset={90}>
                 <ScrollView contentContainerStyle={styles.container}>
@@ -69,14 +85,14 @@ class SharePlace extends Component {
                         <Heading>Share a Place with us</Heading>
                     </MainText>
                     <PickImage />
-                    <PickLocation />
+                    <PickLocation onLocationPick={this.handlePickLocation} />
                     <AddPlace
                         value={placeName.value}
                         touched={placeName.touched}
                         valid={placeName.isValid}
                         onChangeText={this.onChange} />
                     <View style={styles.button}>
-                        <Button title='Share the Place' onPress={this.handleAddPlace} disabled={!placeName.isValid} />
+                        <Button title='Share the Place' onPress={this.handleAddPlace} disabled={!isFormValid} />
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -85,7 +101,7 @@ class SharePlace extends Component {
 }
 
 const mapDispatchToProps = dispatch => ({
-    onAddPlace: name => dispatch(addPlace(name))
+    onAddPlace: (name, location) => dispatch(addPlace(name, location))
 })
 
 const styles = StyleSheet.create({

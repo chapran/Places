@@ -14,7 +14,8 @@ export default (state = initialState, action) => {
                     key: Math.random().toString(),
                     image: {
                         uri: 'https://www.w3schools.com/w3css/img_lights.jpg'
-                    }
+                    },
+                    location: action.location
                 }]
             }
         case types.DELETE_PLACE:
