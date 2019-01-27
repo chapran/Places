@@ -2,8 +2,6 @@ import React, { Component, Fragment } from 'react'
 import { View, Button, StyleSheet, Image } from 'react-native'
 import ImagePicker from 'react-native-image-picker'
 
-import placeholder from '../assets/placeholder.jpg'
-
 const styles = StyleSheet.create({
     placeholder: {
         borderWidth: 1,
