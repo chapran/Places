@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import { Text, SafeAreaView, View, Image, StyleSheet, TouchableOpacity, Platform, Dimensions } from 'react-native'
+import { Text, SafeAreaView, View, Image, StyleSheet, TouchableOpacity, Platform, Dimensions, ScrollView } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { connect } from 'react-redux'
 import { deletePlace } from '../store/actions'
+import MapView from 'react-native-maps'
 
 class PlaceDetail extends Component {
     constructor(props) {
@@ -33,24 +34,38 @@ class PlaceDetail extends Component {
 
     render() {
         const { selectedPlace } = this.props
-        const { image, name } = selectedPlace
+        const { image, name, location } = selectedPlace
         const { viewMode } = this.state
         const screenStyles = viewMode === 'portrait' ? styles.portraitScreen : styles.landscapeScreen
-        const imageStyles = [styles.image, viewMode === 'portrait' ? styles.fullWidth : undefined]
+        const displayBlockStyles = [styles.displayBlock, viewMode === 'portrait' ? styles.fullWidth : undefined]
         const infoContainerStyles = [styles.infoContainer, viewMode === 'portrait' ? styles.fullWidth : undefined]
+        const { width, height } = Dimensions.get('window')
         return (
-            <SafeAreaView style={screenStyles}>
-                <Image source={image} style={imageStyles} />
-                <View style={infoContainerStyles}>
-                    <Text style={styles.placeName}>{name}</Text>
-                    <View>
-                        <TouchableOpacity onPress={this.onPlaceDelete}>
-                            <View style={styles.trashButton}>
-                                <Icon name={Platform.OS === 'ios' ? 'ios-trash' : 'md-trash'} size={30} color='red' />
-                            </View>
-                        </TouchableOpacity>
+            <SafeAreaView>
+                <ScrollView>
+                    <View style={screenStyles}>
+                        <View style={displayBlockStyles}>
+                            <Image source={image} style={styles.image} />
+                            <MapView
+                                initialRegion={{
+                                    ...location,
+                                    latitudeDelta: 0.0122,
+                                    longitudeDelta: width / height * 0.0122
+                                }}
+                                style={styles.map}>
+                                <MapView.Marker coordinate={location} />
+                            </MapView>
+                        </View>
+                        <View style={infoContainerStyles}>
+                            <Text style={styles.placeName}>{name}</Text>
+                            <TouchableOpacity onPress={this.onPlaceDelete}>
+                                <View style={styles.trashButton}>
+                                    <Icon name={Platform.OS === 'ios' ? 'ios-trash' : 'md-trash'} size={30} color='red' />
+                                </View>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
+                </ScrollView>
             </SafeAreaView>
         )
     }
@@ -63,9 +78,18 @@ const styles = StyleSheet.create({
     landscapeScreen: {
         flexDirection: 'row'
     },
-    image: {
+    displayBlock: {
+        height: 300,
         width: '50%',
-        height: 200
+        marginBottom: 10
+    },
+    image: {
+        width: '100%',
+        flex: 1
+    },
+    map: {
+        width: '100%',
+        flex: 1
     },
     infoContainer: {
         alignItems: 'center',
