@@ -6,6 +6,7 @@ import com.reactnativenavigation.NavigationApplication;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.airbnb.android.react.maps.MapsPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -14,6 +15,7 @@ import com.facebook.soloader.SoLoader;
 import java.util.Arrays;
 import java.util.List;
 
+import com.airbnb.android.react.maps.MapsPackage;
 
 public class MainApplication extends NavigationApplication {
 
@@ -58,7 +60,8 @@ public class MainApplication extends NavigationApplication {
 		// Add additional packages you require here
 		// No need to add RnnPackage and MainReactPackage
 		return Arrays.<ReactPackage>asList(
-      new VectorIconsPackage()      
+      new VectorIconsPackage(),
+      new MapsPackage()   
 		);
 	}
 

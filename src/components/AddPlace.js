@@ -9,12 +9,11 @@ const styles = StyleSheet.create({
     }
 })
 
-const AddPlace = ({ placeName, onChange }) => (
+const AddPlace = (props) => (
     <DefaultInput
         style={styles.input}
         placeholder='Place Name'
-        value={placeName}
-        onChangeText={onChange} />
+        {...props} />
 )
 
 export default AddPlace
