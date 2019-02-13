@@ -1,20 +1,23 @@
 import * as types from '../actions/actionTypes'
 
 const initialState = {
-    places: []
+    isLoading: false
 }
 
 export default (state = initialState, action) => {
     switch (action.type) {
-        case types.SET_PLACES:
+
+        case types.UI_START_LOADING:
             return {
                 ...state,
-                places: action.places
+                isLoading: true
             }
-        case types.DELETE_PLACE:
+        case types.UI_STOP_LOADING:
             return {
-                places: state.places.filter(place => place.key !== action.placeKey)
+                ...state,
+                isLoading: false
             }
+
         default:
             return state
     }

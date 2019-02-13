@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Button, StyleSheet, ScrollView, KeyboardAvoidingView } from 'react-native'
+import { View, Button, StyleSheet, ScrollView, KeyboardAvoidingView, ActivityIndicator } from 'react-native'
 import { connect } from 'react-redux'
 
 import AddPlace from '../components/AddPlace'
@@ -94,6 +94,14 @@ class SharePlace extends Component {
     render() {
         const { placeName, location } = this.state.controls
         const isFormValid = placeName.isValid && location.isValid
+        let submitButton = (
+            <Button title='Share the Place' onPress={this.handleAddPlace} disabled={!isFormValid} />
+        )
+        if (this.props.isLoading) {
+            submitButton = (
+                <ActivityIndicator />
+            )
+        }
         return (
             <KeyboardAvoidingView behavior='position' keyboardVerticalOffset={90}>
                 <ScrollView contentContainerStyle={styles.container}>
@@ -108,7 +116,7 @@ class SharePlace extends Component {
                         valid={placeName.isValid}
                         onChangeText={this.onChange} />
                     <View style={styles.button}>
-                        <Button title='Share the Place' onPress={this.handleAddPlace} disabled={!isFormValid} />
+                        {submitButton}
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
@@ -118,6 +126,10 @@ class SharePlace extends Component {
 
 const mapDispatchToProps = dispatch => ({
     onAddPlace: (name, location, image) => dispatch(addPlace(name, location, image))
+})
+
+const mapStateToProps = state => ({
+    isLoading: state.ui.isLoading
 })
 
 const styles = StyleSheet.create({
@@ -130,4 +142,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default connect(null, mapDispatchToProps)(SharePlace)
+export default connect(mapStateToProps, mapDispatchToProps)(SharePlace)

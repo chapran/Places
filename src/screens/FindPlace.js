@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import { View, TouchableWithoutFeedback, Text, StyleSheet, Animated } from 'react-native'
-import PlaceList from '../components/List'
 import { connect } from 'react-redux'
+
+import PlaceList from '../components/List'
+import { getPlaces } from '../store/actions'
 
 class FindPlace extends Component {
     static navigatorStyle = {
@@ -17,6 +19,10 @@ class FindPlace extends Component {
     constructor(props) {
         super(props)
         props.navigator.setOnNavigatorEvent(this.onNavigatorEvent)
+    }
+
+    componentDidMount() {
+        this.props.getPlaces()
     }
 
     onNavigatorEvent = e => {
@@ -60,7 +66,7 @@ class FindPlace extends Component {
     }
 
     render() {
-        const { placesLoaded, removeAnimation, fadeInAnimation} = this.state
+        const { placesLoaded, removeAnimation, fadeInAnimation } = this.state
         let content = (
             <Animated.View style={{
                 opacity: removeAnimation,
@@ -95,10 +101,6 @@ class FindPlace extends Component {
     }
 }
 
-const mapStateTpProps = state => ({
-    places: state.places.places
-})
-
 const styles = StyleSheet.create({
     buttonContainer: {
         flex: 1,
@@ -118,4 +120,12 @@ const styles = StyleSheet.create({
     }
 })
 
-export default connect(mapStateTpProps)(FindPlace)
+const mapStateTpProps = state => ({
+    places: state.places.places
+})
+
+const mapDispatchToProps = dispatch => ({
+    getPlaces: () => dispatch(getPlaces())
+})
+
+export default connect(mapStateTpProps, mapDispatchToProps)(FindPlace)
