@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
-import { View, StyleSheet, ImageBackground, Dimensions, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback } from 'react-native'
-import startMainTabs from './MainTabs/startMainTabs'
+import { View, StyleSheet, ImageBackground, Dimensions, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, ActivityIndicator } from 'react-native'
 import DefaultInput from '../components/UI/DefaultInput'
 import Heading from '../components/UI/Heading'
 import MainText from '../components/UI/MainText'
@@ -8,7 +7,7 @@ import bg from '../assets/bg.jpg'
 import DefaultButton from '../components/UI/DefaultButton'
 import validate from '../utils/validation'
 import { connect } from 'react-redux'
-import { tryAuth } from '../store/actions/auth'
+import { tryAuth, authAutoSignIn } from '../store/actions/auth'
 
 class Auth extends Component {
     constructor(props) {
@@ -45,6 +44,10 @@ class Auth extends Component {
             }
         }
         Dimensions.addEventListener('change', this.handleOrientationChange)
+    }
+
+    componentDidMount() {
+        this.props.authAutoSignIn()
     }
 
     toggleAuthMode = () => {
@@ -86,14 +89,13 @@ class Auth extends Component {
         })
     }
 
-    loginHandler = () => {
+    authHandler = () => {
         const { email, password } = this.state.controls
         const authData = {
             email: email.value,
             password: password.value
         }
-        this.props.tryAuth(authData)
-        startMainTabs()
+        this.props.tryAuth(authData, this.state.authMode)
     }
 
     componentWillUnmount() {
@@ -101,6 +103,15 @@ class Auth extends Component {
     }
 
     render() {
+        const submitSection = this.props.isLoading ? (
+            <ActivityIndicator />
+        ) : (
+                <DefaultButton
+                    disabled={isFormInvalid}
+                    color='#29aaf4'
+                    title='Submit'
+                    onPress={this.authHandler} />
+            )
         const { authMode, viewMode, controls } = this.state
         const { email, password, confirmPassword } = controls
         let headingText = null, passwordContainerStyles, passwordWrapperStyles
@@ -167,11 +178,7 @@ class Auth extends Component {
                             </View>
                         </View>
                     </TouchableWithoutFeedback>
-                    <DefaultButton
-                        disabled={isFormInvalid}
-                        color='#29aaf4'
-                        title='Submit'
-                        onPress={this.loginHandler} />
+                    {submitSection}
                 </KeyboardAvoidingView>
             </ImageBackground>
         )
@@ -214,8 +221,13 @@ const styles = StyleSheet.create({
     }
 })
 
-const mapDispatchToProps = dispatch => ({
-    tryAuth: data => dispatch(tryAuth(data))
+const mapStateToProps = state => ({
+    isLoading: state.ui.isLoading
 })
 
-export default connect(null, mapDispatchToProps)(Auth)
+const mapDispatchToProps = dispatch => ({
+    tryAuth: (data, authMode) => dispatch(tryAuth(data, authMode)),
+    authAutoSignIn: () => dispatch(authAutoSignIn())
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Auth)

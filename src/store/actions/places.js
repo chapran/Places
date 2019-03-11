@@ -1,18 +1,25 @@
 import { STORE_IMAGE_FUNCTION_URL, API_URL } from '../../../apiConfig'
-import * as types from './actionTypes'
+import * as types from '../../constants/actionTypes'
 import { uiStartLoading, uiStopLoading } from './ui'
+import { authGetToken } from './auth'
 
 export const addPlace = (placeName, location, image) => {
   return async (dispatch) => {
     try {
       dispatch(uiStartLoading())
+      const token = await dispatch(authGetToken())
       const imageUploadRes = await fetch(STORE_IMAGE_FUNCTION_URL, {
         method: 'POST',
         body: JSON.stringify({
           image: image.base64
-        })
+        }),
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       })
       const { imageUrl } = await imageUploadRes.json()
+
+      if(!imageUrl) throw new Error('Image upload failed.')
 
       const placeData = {
         name: placeName,
@@ -20,22 +27,26 @@ export const addPlace = (placeName, location, image) => {
         image: imageUrl
       }
 
-      const addPlaceRes = await fetch(`${API_URL}/places.json`, {
+      const addPlaceRes = await fetch(`${API_URL}/places.json?auth=${token}`, {
         method: 'POST',
         body: JSON.stringify(placeData)
       })
-      await addPlaceRes.json()
+      const parsedRes = await addPlaceRes.json()
+      if (parsedRes.error) {
+        throw parsedRes.error
+      }
       dispatch(uiStopLoading())
 
+      // TODO: Add places list updater
     } catch (e) {
       console.log(e);
-      alert('Sorry, place upload failed. Please try again.')
+      alert(e.message)
       dispatch(uiStopLoading())
     }
   }
 }
 
-export const setPlaces = places => ({
+const setPlaces = places => ({
   type: types.SET_PLACES,
   places
 })
@@ -43,9 +54,13 @@ export const setPlaces = places => ({
 export const getPlaces = () => {
   return async (dispatch) => {
     try {
-      const res = await fetch(`${API_URL}/places.json`)
-      
+      const token = await dispatch(authGetToken())
+      const res = await fetch(`${API_URL}/places.json?auth=${token}`)
+
       const parsedRes = await res.json()
+      if (parsedRes.error) {
+        throw parsedRes.error
+      }
       const places = Object.keys(parsedRes).map(key => ({
         ...parsedRes[key],
         image: {
@@ -53,16 +68,34 @@ export const getPlaces = () => {
         },
         key
       }))
+
       dispatch(setPlaces(places))
     } catch (e) {
       console.log(e)
       alert('Sorry, fetching places failed.')
-      throw e
+      return Promise.reject()
     }
   }
 }
 
-
-export const deletePlace = placeKey => ({
+const deletePlace = placeKey => ({
   type: types.DELETE_PLACE, placeKey
 })
+
+export const removePlaceFromFirebase = placeKey => {
+  return async (dispatch) => {
+    dispatch(uiStartLoading())
+    try {
+      const token = await dispatch(authGetToken())
+      await fetch(`${API_URL}/places/${placeKey}.json?auth=${token}`, {
+        method: 'DELETE'
+      })
+      dispatch(deletePlace(placeKey))
+      dispatch(uiStopLoading())
+    } catch (e) {
+      console.log(e)
+      alert('Sorry, place deletion failed.')
+      dispatch(uiStopLoading())
+    }
+  }
+}

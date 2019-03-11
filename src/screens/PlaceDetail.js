@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { Text, SafeAreaView, View, Image, StyleSheet, TouchableOpacity, Platform, Dimensions, ScrollView } from 'react-native'
+import { Text, SafeAreaView, View, Image, StyleSheet, TouchableOpacity, Platform, Dimensions, ScrollView, ActivityIndicator } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { connect } from 'react-redux'
-import { deletePlace } from '../store/actions'
+import { removePlaceFromFirebase } from '../store/actions'
 import MapView from 'react-native-maps'
 
 class PlaceDetail extends Component {
@@ -23,9 +23,9 @@ class PlaceDetail extends Component {
     }
 
     onPlaceDelete = () => {
-        const { selectedPlace, deletePlace } = this.props
+        const { selectedPlace, deletePlace, navigator } = this.props
         deletePlace(selectedPlace.key)
-        this.props.navigator.pop()
+            .then(() => navigator.pop())
     }
 
     componentWillUnmount() {
@@ -33,7 +33,7 @@ class PlaceDetail extends Component {
     }
 
     render() {
-        const { selectedPlace } = this.props
+        const { selectedPlace, isLoading } = this.props
         const { image, name, location } = selectedPlace
         const { viewMode } = this.state
         const screenStyles = viewMode === 'portrait' ? styles.portraitScreen : styles.landscapeScreen
@@ -58,11 +58,15 @@ class PlaceDetail extends Component {
                         </View>
                         <View style={infoContainerStyles}>
                             <Text style={styles.placeName}>{name}</Text>
-                            <TouchableOpacity onPress={this.onPlaceDelete}>
-                                <View style={styles.trashButton}>
-                                    <Icon name={Platform.OS === 'ios' ? 'ios-trash' : 'md-trash'} size={30} color='red' />
-                                </View>
-                            </TouchableOpacity>
+                            {isLoading ? (
+                                <ActivityIndicator />
+                            ) : (
+                                <TouchableOpacity onPress={this.onPlaceDelete}>
+                                    <View style={styles.trashButton}>
+                                        <Icon name={Platform.OS === 'ios' ? 'ios-trash' : 'md-trash'} size={30} color='red' />
+                                    </View>
+                                </TouchableOpacity>
+                            )}
                         </View>
                     </View>
                 </ScrollView>
@@ -109,8 +113,12 @@ const styles = StyleSheet.create({
     }
 })
 
-const mapDispatchToProps = dispatch => ({
-    deletePlace: key => dispatch(deletePlace(key))
+const mapStateToProps = state => ({
+    isLoading: state.ui.isLoading
 })
 
-export default connect(null, mapDispatchToProps)(PlaceDetail)
+const mapDispatchToProps = dispatch => ({
+    deletePlace: key => dispatch(removePlaceFromFirebase(key))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(PlaceDetail)

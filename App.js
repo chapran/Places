@@ -14,12 +14,14 @@ Navigation.registerComponent('rn_udemy_app.AuthScreen', () => Auth, store, Provi
 Navigation.registerComponent('rn_udemy_app.SharePlace', () => SharePlace, store, Provider)
 Navigation.registerComponent('rn_udemy_app.FindPlace', () => FindPlace, store, Provider)
 Navigation.registerComponent('rn_udemy_app.PlaceDetail', () => PlaceDetail, store, Provider)
-Navigation.registerComponent('rn_udemy_app.SideDrawer', () => SideDrawer)
+Navigation.registerComponent('rn_udemy_app.SideDrawer', () => SideDrawer, store, Provider)
 
 // Start an app
-Navigation.startSingleScreenApp({
+const startApp = () => Navigation.startSingleScreenApp({
   screen: {
     screen: 'rn_udemy_app.AuthScreen',
     title: 'Login'
   }
 })
+
+export default startApp

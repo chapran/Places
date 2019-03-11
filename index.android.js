@@ -1,1 +1,3 @@
-import App from './App';
+import startApp from './App';
+
+startApp()
