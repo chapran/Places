@@ -17,14 +17,15 @@ export const addPlace = (placeName, location, image) => {
           'Authorization': `Bearer ${token}`
         }
       })
-      const { imageUrl } = await imageUploadRes.json()
+      const { imageUrl, imagePath } = await imageUploadRes.json()
 
       if(!imageUrl) throw new Error('Image upload failed.')
 
       const placeData = {
         name: placeName,
         location,
-        image: imageUrl
+        image: imageUrl,
+        imagePath
       }
 
       const addPlaceRes = await fetch(`${API_URL}/places.json?auth=${token}`, {
@@ -58,7 +59,7 @@ export const getPlaces = () => {
       const res = await fetch(`${API_URL}/places.json?auth=${token}`)
 
       const parsedRes = await res.json()
-      if (parsedRes.error) {
+      if (parsedRes.null || parsedRes.error) {
         throw parsedRes.error
       }
       const places = Object.keys(parsedRes).map(key => ({

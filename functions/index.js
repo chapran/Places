@@ -35,10 +35,11 @@ exports.storeImage = functions.https.onRequest((request, response) => {
                 })
                 const bucket = gcs.bucket('places-fb.appspot.com')
                 const uniqueId = uuid()
+                const imagePath = '/places/' + uniqueId + '.jpg'
 
                 bucket.upload('/tmp/uploaded-image.jpg', {
                     uploadType: 'media',
-                    destination: '/places/' + uniqueId + '.jpg',
+                    destination: imagePath,
                     metadata: {
                         metadata: {
                             contentType: 'image/jpeg',
@@ -53,7 +54,8 @@ exports.storeImage = functions.https.onRequest((request, response) => {
                                 '/o/' +
                                 encodeURIComponent(file.name) +
                                 '?alt=media&token=' +
-                                uniqueId
+                                uniqueId,
+                            imagePath
                         })
                     } else {
                         console.log(err)
@@ -69,3 +71,11 @@ exports.storeImage = functions.https.onRequest((request, response) => {
             })
     })
 });
+
+exports.removeImage = functions.database.ref('/places/{placeId}').onDelete(snapshot => {
+    const placeData = snapshot.val()
+    const { imagePath } = placeData
+
+    const bucket = gcs.bucket('places-fb.appspot.com')
+    return bucket.file(imagePath).delete()
+})

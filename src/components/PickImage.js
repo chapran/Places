@@ -20,21 +20,29 @@ const styles = StyleSheet.create({
     }
 })
 
+const initialState = {
+    pickedImage: null
+}
+
 export default class PickImage extends Component {
-    state = {
-        pickedImage: null
+    state = { ...initialState }
+
+    reset() {
+        this.setState({ ...initialState })
     }
 
     pickImageHandler = () => {
         ImagePicker.showImagePicker({
-            title: 'Pick an image'
+            title: 'Pick an image',
+            maxHeight: 600,
+            maxWidth: 800
         }, res => {
-            if(res.didCancel) {
-                console.log('User didn`t pick any image.' )
+            if (res.didCancel) {
+                console.log('User didn`t pick any image.')
             } else if (res.error) {
                 console.log("Error", res.error);
             } else {
-                const {uri, data} = res
+                const { uri, data } = res
                 this.setState({
                     pickedImage: {
                         uri

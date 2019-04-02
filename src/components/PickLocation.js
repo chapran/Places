@@ -13,19 +13,23 @@ const styles = StyleSheet.create({
     }
 })
 
+const { width, height } = Dimensions.get('window')
+
+const initialState = {
+    focusedLocation: {
+        latitude: 37.7900352,
+        longitude: -122.4013726,
+        latitudeDelta: 0.0122,
+        longitudeDelta: width / height * 0.0122
+    },
+    locationChosen: false
+}
+
 export default class PickLocation extends Component {
-    constructor() {
-        super()
-        const { width, height } = Dimensions.get('window')
-        this.state = {
-            focusedLocation: {
-                latitude: 37.7900352,
-                longitude: -122.4013726,
-                latitudeDelta: 0.0122,
-                longitudeDelta: width / height * 0.0122
-            },
-            locationChosen: false
-        }
+    state = { ...initialState }
+
+    reset() {
+        this.setState({ ...initialState })
     }
 
     handlePickLocation = e => {
@@ -74,6 +78,7 @@ export default class PickLocation extends Component {
             <Fragment>
                 <MapView
                     initialRegion={focusedLocation}
+                    region={locationChosen ? null : focusedLocation}
                     onPress={this.handlePickLocation}
                     ref={ref => this.map = ref}
                     style={styles.map}>

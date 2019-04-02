@@ -1,14 +1,35 @@
 import React, { Component } from 'react'
-import { View, Button, StyleSheet, ScrollView, KeyboardAvoidingView, ActivityIndicator } from 'react-native'
+import { View, Button, StyleSheet, ScrollView, ActivityIndicator } from 'react-native'
 import { connect } from 'react-redux'
 
 import AddPlace from '../components/AddPlace'
 import { addPlace } from '../store/actions'
 import Heading from '../components/UI/Heading'
 import MainText from '../components/UI/MainText'
-import PickImage from '../components/PickImage';
-import PickLocation from '../components/PickLocation';
+import PickImage from '../components/PickImage'
+import PickLocation from '../components/PickLocation'
 import validate from '../utils/validation'
+
+const initialState = {
+    controls: {
+        placeName: {
+            value: '',
+            isValid: false,
+            touched: false,
+            validationRules: {
+                minLength: 2
+            }
+        },
+        location: {
+            value: null,
+            isValid: false
+        },
+        image: {
+            value: null,
+            isValid: false
+        }
+    }
+}
 
 class SharePlace extends Component {
     static navigatorStyle = {
@@ -18,26 +39,13 @@ class SharePlace extends Component {
     constructor(props) {
         super(props)
         props.navigator.setOnNavigatorEvent(this.onNavigatorEvent)
-        this.state = {
-            controls: {
-                placeName: {
-                    value: '',
-                    isValid: false,
-                    touched: false,
-                    validationRules: {
-                        minLength: 2
-                    }
-                },
-                location: {
-                    value: null,
-                    isValid: false
-                },
-                image: {
-                    value: null,
-                    isValid: false
-                }
-            }
-        }
+        this.state = { ...initialState }
+    }
+
+    reset() {
+        this.setState({ ...initialState })
+        this.imagePicker.reset()
+        this.locationPicker.reset()
     }
 
     onChange = value => {
@@ -62,9 +70,14 @@ class SharePlace extends Component {
         }
     }
 
-    handleAddPlace = () => {
+    handleAddPlace = async () => {
         const { placeName, location, image } = this.state.controls
-        this.props.onAddPlace(placeName.value, location.value, image.value)
+        const { navigator, onAddPlace } = this.props
+        await onAddPlace(placeName.value, location.value, image.value)
+        navigator.switchToTab({
+            tabIndex: 0
+        })
+        this.reset()
     }
 
     handlePickLocation = location => {
@@ -103,23 +116,21 @@ class SharePlace extends Component {
             )
         }
         return (
-            <KeyboardAvoidingView behavior='position' keyboardVerticalOffset={90}>
-                <ScrollView contentContainerStyle={styles.container}>
-                    <MainText>
-                        <Heading>Share a Place with us</Heading>
-                    </MainText>
-                    <PickImage onImagePicked={this.handlePickImage} />
-                    <PickLocation onLocationPick={this.handlePickLocation} />
-                    <AddPlace
-                        value={placeName.value}
-                        touched={placeName.touched}
-                        valid={placeName.isValid}
-                        onChangeText={this.onChange} />
-                    <View style={styles.button}>
-                        {submitButton}
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
+            <ScrollView contentContainerStyle={styles.container}>
+                <MainText>
+                    <Heading>Share a Place with us</Heading>
+                </MainText>
+                <PickImage onImagePicked={this.handlePickImage} ref={ref => this.imagePicker = ref} />
+                <PickLocation onLocationPick={this.handlePickLocation} ref={ref => this.locationPicker = ref} />
+                <AddPlace
+                    value={placeName.value}
+                    touched={placeName.touched}
+                    valid={placeName.isValid}
+                    onChangeText={this.onChange} />
+                <View style={styles.button}>
+                    {submitButton}
+                </View>
+            </ScrollView>
         )
     }
 }
