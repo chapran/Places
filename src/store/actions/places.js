@@ -19,7 +19,7 @@ export const addPlace = (placeName, location, image) => {
       })
       const { imageUrl, imagePath } = await imageUploadRes.json()
 
-      if(!imageUrl) throw new Error('Image upload failed.')
+      if (!imageUrl) throw new Error('Image upload failed.')
 
       const placeData = {
         name: placeName,
@@ -59,9 +59,16 @@ export const getPlaces = () => {
       const res = await fetch(`${API_URL}/places.json?auth=${token}`)
 
       const parsedRes = await res.json()
-      if (parsedRes.null || parsedRes.error) {
+
+      if (parsedRes === null) {
+        alert('No places found.')
+        return
+      }
+
+      if (parsedRes.error) {
         throw parsedRes.error
       }
+
       const places = Object.keys(parsedRes).map(key => ({
         ...parsedRes[key],
         image: {
@@ -74,7 +81,7 @@ export const getPlaces = () => {
     } catch (e) {
       console.log(e)
       alert('Sorry, fetching places failed.')
-      return Promise.reject()
+      // return Promise.reject()
     }
   }
 }
